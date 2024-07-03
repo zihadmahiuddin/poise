@@ -525,6 +525,7 @@ context_methods! {
     /// Returns the current gateway heartbeat latency ([`::serenity::gateway::Shard::latency()`]).
     ///
     /// If the shard has just connected, this value is zero.
+    #[cfg(feature = "shard-manager")]
     await (ping self)
     (pub async fn ping(self) -> std::time::Duration) {
         match self.framework().shard_manager.runners.lock().await.get(&self.serenity_context().shard_id) {

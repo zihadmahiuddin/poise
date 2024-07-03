@@ -36,7 +36,7 @@ fluent-syntax = "0.11"
 rand = "0.8.5"
 
 [features]
-default = ["serenity/rustls_backend", "cache", "chrono", "handle_panics"]
+default = ["serenity/rustls_backend", "cache", "chrono", "handle_panics", "shard-manager"]
 chrono = ["serenity/chrono"]
 cache = ["serenity/cache"]
 # No-op feature because serenity/collector is now enabled by default
@@ -46,6 +46,7 @@ collector = []
 # This feature exists because some users want to disable the mere possibility of catching panics at
 # build time for peace of mind.
 handle_panics = []
+shard-manager = []
 
 [package.metadata.docs.rs]
 all-features = true

@@ -30,6 +30,7 @@ pub struct Framework<U, E> {
     options: crate::FrameworkOptions<U, E>,
 
     /// Initialized to Some during construction; so shouldn't be None at any observable point
+    #[cfg(feature = "shard-manager")]
     shard_manager: Option<Arc<serenity::ShardManager>>,
     /// Filled with Some on construction. Taken out and executed on first Ready gateway event
     setup: std::sync::Mutex<
@@ -90,6 +91,7 @@ impl<U, E> Framework<U, E> {
             bot_id: std::sync::OnceLock::new(),
             setup: std::sync::Mutex::new(Some(Box::new(setup))),
             edit_tracker_purge_task: None,
+            #[cfg(feature = "shard-manager")]
             shard_manager: None,
             options,
         }
@@ -102,6 +104,7 @@ impl<U, E> Framework<U, E> {
 
     /// Returns the serenity's client shard manager.
     // Returns a reference so you can plug it into [`FrameworkContext`]
+    #[cfg(feature = "shard-manager")]
     pub fn shard_manager(&self) -> &Arc<serenity::ShardManager> {
         self.shard_manager
             .as_ref()
@@ -133,12 +136,16 @@ impl<U: Send + Sync, E: Send + Sync> serenity::Framework for Framework<U, E> {
     async fn init(&mut self, client: &serenity::Client) {
         set_qualified_names(&mut self.options.commands);
 
+        #[cfg(feature = "shard-manager")]
         message_content_intent_sanity_check(
             &self.options.prefix_options,
             client.shard_manager.intents(),
         );
 
-        self.shard_manager = Some(client.shard_manager.clone());
+        #[cfg(feature = "shard-manager")]
+        {
+            self.shard_manager = Some(client.shard_manager.clone());
+        }
 
         if self.options.initialize_owners {
             if let Err(e) = insert_owners_from_http(&client.http, &mut self.options.owners).await {
@@ -199,6 +206,7 @@ async fn raw_dispatch_event<U, E>(
         bot_id,
         options: &framework.options,
         user_data,
+        #[cfg(feature = "shard-manager")]
         shard_manager: framework.shard_manager(),
     };
     crate::dispatch_event(framework, &ctx, event).await;
